@@ -101,3 +101,7 @@ appsettings.Local.json
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Files specific to this project
+KE_HOACH_CHI_TIET_GIAI_DOAN_2.md
+MIGRATION_PLAN_TO_DOTNET.md
