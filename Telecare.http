@@ -1,6 +1,0 @@
-@Telecare_HostAddress = http://localhost:5159
-
-GET {{Telecare_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
