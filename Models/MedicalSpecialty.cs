@@ -8,5 +8,8 @@ namespace Models
         public int MedicalSpecialtyId { get; set; }
         public string EnglishName { get; set; }
         public string VietnameseName { get; set; }
+
+        // Navigation Property
+        public ICollection<Doctor> Doctors { get; set; } = new List<Doctor>();
     }
 }

@@ -10,7 +10,13 @@ namespace Models
         public string Email { get; set; }
         public string PasswordHash { get; set; }
         public Role Role { get; set; }
-        public string GoogleId { get; set; }
-        public string Img { get; set; }
+        public string? GoogleId { get; set; }
+        public string? Img { get; set; }
+
+        // Navigation Properties
+        public Patient Patient { get; set; }
+        public Hospital Hospital { get; set; }
+        public Doctor Doctor { get; set; }
+        public ICollection<Token> Tokens { get; set; } = new List<Token>();
     }
 }

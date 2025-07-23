@@ -10,6 +10,10 @@ namespace Models
         public string Name { get; set; }
         public string Address { get; set; }
         public string WorkingTime { get; set; }
-        public float? Point { get; set; }
+        public double? Point { get; set; }
+
+        // Navigation Properties
+        public User User { get; set; }
+        public ICollection<Doctor> Doctors { get; set; } = new List<Doctor>();
     }
 }

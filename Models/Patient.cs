@@ -13,5 +13,8 @@ namespace Models
         public Sex? Sex { get; set; }
         public string Phone { get; set; }
         public string Address { get; set; }
+
+        // Navigation Property
+        public User User { get; set; }
     }
 }

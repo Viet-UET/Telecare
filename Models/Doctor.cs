@@ -15,8 +15,13 @@ namespace Models
         public int? MedicalSpecialtyId { get; set; }
         public long? HospitalId { get; set; }
         public string Degree { get; set; }
-        public float ConsultingPriceViaMessage { get; set; }
-        public float ConsultingPriceViaCall { get; set; }
-        public float? Point { get; set; }
+        public double? ConsultingPriceViaMessage { get; set; }
+        public double? ConsultingPriceViaCall { get; set; }
+        public double? Point { get; set; }
+
+        // Navigation Properties
+        public User User { get; set; }
+        public MedicalSpecialty MedicalSpecialty { get; set; }
+        public Hospital Hospital { get; set; }
     }
 }
