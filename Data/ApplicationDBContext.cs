@@ -14,12 +14,12 @@ namespace Data
         }
 
         // Khai báo các bảng
-        DbSet<User> Users { get; set; }
-        DbSet<Patient> Patients { get; set; }
-        DbSet<Doctor> Doctors { get; set; }
-        DbSet<Hospital> Hospitals { get; set; }
-        DbSet<MedicalSpecialty> MedicalSpecialties { get; set; }
-        DbSet<Token> Tokens { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Patient> Patients { get; set; }
+        public DbSet<Doctor> Doctors { get; set; }
+        public DbSet<Hospital> Hospitals { get; set; }
+        public DbSet<MedicalSpecialty> MedicalSpecialties { get; set; }
+        public DbSet<Token> Tokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
