@@ -7,7 +7,7 @@ namespace Models
     public class Token
     {
         public long UserId { get; set; }
-        public string TokenValue { get; set; } 
+        public string TokenValue { get; set; }
         public bool? Expires { get; set; }
 
         // Navigation Property
