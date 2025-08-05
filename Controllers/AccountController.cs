@@ -16,6 +16,8 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
+using System.Xml.Schema;
+using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
 
 
 namespace Controllers
@@ -310,6 +312,42 @@ namespace Controllers
                 UserId = loginUser.UserId,
                 Role = loginUser.Role
             });
+        }
+
+        [HttpGet("logout")]
+        public async Task<ActionResult<string>> Logout(string tokenValue)
+        {
+            var currentToken = await _context.Tokens.FirstOrDefaultAsync(t => t.TokenValue == tokenValue);
+            if (currentToken != null)
+            {
+                _context.Tokens.Remove(currentToken);
+                await _context.SaveChangesAsync();
+                return Ok("Logged out successfully");
+            }
+            else
+            {
+                return BadRequest("Invalid token");
+            }
+
+        }
+
+        [HttpPost("change-password")]
+        public async Task<ActionResult<string>> ChangePassword(string email, string newPassword)
+        {
+            var check = await IsUserRegistered(email);
+            if (check == "not registered")
+            {
+                return BadRequest("Email is not registered");
+            }
+            else
+            {
+                var p = email + newPassword;
+                var newHashPassword = BCrypt.Net.BCrypt.HashPassword(p);
+                var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+                currentUser.PasswordHash = newHashPassword;
+                await _context.SaveChangesAsync();
+                return Ok("Password changed successfully");
+            }
         }
 
 
