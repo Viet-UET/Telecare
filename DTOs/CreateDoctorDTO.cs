@@ -1,6 +1,6 @@
 using Models.Enums;
 
-namespace Models
+namespace DTOs
 {
     public class CreateDoctorDTO
     {

@@ -21,9 +21,14 @@ using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
 
 
 namespace Controllers
+
 {
+    // [ApiController]
+    // [Route("[controller]")]
     public class AccountController : ControllerBase
     {
+        private const string JWT_SECRET_KEY = "hoangsaongocxamhathanhmocaibatajmanasdaueirawbiefonokfnenjdeckn";
+
         private readonly ApplicationDBContext _context;
         public AccountController(ApplicationDBContext context)
         {
@@ -31,7 +36,7 @@ namespace Controllers
         }
 
 
-        public async Task<string> IsUserRegistered(string email)
+        private async Task<string> IsUserRegistered(string email)
         {
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
@@ -43,7 +48,7 @@ namespace Controllers
             return "registered";
         }
 
-        public async Task<ActionResult<User>> CreateUser(string email, string password, Role role)
+        private async Task<ActionResult<User>> CreateUser(string email, string password, Role role)
         {
             var existUser = await _context.Users.Where(u => u.Email == email).FirstOrDefaultAsync();
             if (existUser != null)
@@ -88,10 +93,14 @@ namespace Controllers
             }
             else
             {
-                var newUser = await CreateUser(createPatientDTO.Email, createPatientDTO.Password, Role.PATIENT);
+                var newUserResult = await CreateUser(createPatientDTO.Email, createPatientDTO.Password, Role.PATIENT);
+                if (newUserResult.Value == null)
+                {
+                    return BadRequest("Failed to create user");
+                }
                 var newP = new Patient
                 {
-                    UserId = newUser.Value.UserId,
+                    UserId = newUserResult.Value.UserId,
                     Name = createPatientDTO.Name,
                     Age = createPatientDTO.Age,
                     Sex = createPatientDTO.Sex,
@@ -126,10 +135,14 @@ namespace Controllers
             }
             else
             {
-                var newUser = await CreateUser(createHospitalDTO.Email, createHospitalDTO.Password, Role.HOSPITAL);
+                var newUserResult = await CreateUser(createHospitalDTO.Email, createHospitalDTO.Password, Role.HOSPITAL);
+                if (newUserResult.Value == null)
+                {
+                    return BadRequest("Failed to create user");
+                }
                 var newH = new Hospital
                 {
-                    UserId = newUser.Value.UserId,
+                    UserId = newUserResult.Value.UserId,
                     Name = createHospitalDTO.Name,
                     Address = createHospitalDTO.Address,
                     WorkingTime = createHospitalDTO.WorkingTime
@@ -208,11 +221,15 @@ namespace Controllers
 
 
 
-            var newUser = await CreateUser(createDoctorDTO.Email, createDoctorDTO.Password, Role.DOCTOR);
+            var newUserResult = await CreateUser(createDoctorDTO.Email, createDoctorDTO.Password, Role.DOCTOR);
+            if (newUserResult.Value == null)
+            {
+                return BadRequest("Failed to create user");
+            }
 
             var newDoctor = new Doctor
             {
-                UserId = newUser.Value.UserId,
+                UserId = newUserResult.Value.UserId,
                 Name = createDoctorDTO.Name,
                 Age = createDoctorDTO.Age,
                 Sex = createDoctorDTO.Sex,
@@ -231,7 +248,7 @@ namespace Controllers
 
 
 
-        public async Task<Token> CreateToken(long userId, bool expires)
+        private async Task<Token> CreateToken(long userId, bool expires)
         {
             var delta = TimeSpan.FromMinutes(15);
             DateTime? expiration;
@@ -257,8 +274,7 @@ namespace Controllers
                 };
 
             //tạo khóa bí mật 
-            var secretKey = userId.ToString() + "hoangsaongocxamhathanhmocaibatajmanasdaueirawbiefonokfnenjdeckn";
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JWT_SECRET_KEY));
 
             //tạo credentials 
             var credential = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -305,7 +321,7 @@ namespace Controllers
             }
 
             //đăng nhập thành công thì tạo token
-            var token = await CreateToken(loginUser.UserId, false);
+            var token = await CreateToken(loginUser.UserId, true);
             return Ok(new
             {
                 TokenValue = token.TokenValue,
@@ -344,11 +360,55 @@ namespace Controllers
                 var p = email + newPassword;
                 var newHashPassword = BCrypt.Net.BCrypt.HashPassword(p);
                 var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+                if (currentUser == null)
+                {
+                    return BadRequest("User not found");
+                }
                 currentUser.PasswordHash = newHashPassword;
                 await _context.SaveChangesAsync();
                 return Ok("Password changed successfully");
             }
         }
+
+        [HttpGet("verify_token_user")]
+        public async Task<ActionResult<string>> VerifyTokenUser(string token)
+        {
+
+            try
+            {
+
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.UTF8.GetBytes(JWT_SECRET_KEY);
+
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
+
+                var tokenInDb = await _context.Tokens.FirstOrDefaultAsync(t => t.TokenValue == token);
+
+                if (tokenInDb == null)
+                {
+                    return Unauthorized("Token is not exist");
+                }
+                return Ok("ok");
+
+            }
+            catch (SecurityTokenExpiredException)
+            {
+                return Unauthorized("Token has expired");
+            }
+            catch (SecurityTokenException)
+            {
+                return Unauthorized("Invalid token");
+            }
+        }
+
 
 
 

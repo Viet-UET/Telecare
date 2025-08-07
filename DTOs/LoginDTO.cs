@@ -1,5 +1,5 @@
 
-namespace Models
+namespace DTOs
 {
     public class LoginDTO
     {
