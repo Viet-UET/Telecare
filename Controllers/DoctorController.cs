@@ -3,6 +3,7 @@ using Data;
 using DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Models;
 using Models.Enums;
 
 namespace Telecare.Controllers
@@ -93,6 +94,39 @@ namespace Telecare.Controllers
 
             await _context.SaveChangesAsync();
             return Ok("Doctor updated successfully");
+        }
+
+        [HttpGet("list-doctor")]
+        public async Task<ActionResult<List<Doctor>>> GetListDoctor()
+        {
+            var doctors = await _context.Doctors.ToListAsync();
+            return Ok(doctors);
+        }
+
+        [HttpGet("list-doctor/name")]
+        public async Task<ActionResult<Doctor>> GetListDoctorByName(string name)
+        {
+            var DoctorHasName = await _context.Doctors.
+        Where(d => d.Name.Contains(name)).ToListAsync();
+            return Ok(DoctorHasName);
+        }
+
+        [HttpGet("doctorbyuserid/{userId}")]
+        public async Task<ActionResult<Object>> GetDoctorByUserId([FromRoute] long userId)
+        {
+            var user = await _context.Users
+            .Where(u => u.UserId == userId)
+            .Select(o => new { o.Email, o.Role, o.GoogleId })
+            .FirstOrDefaultAsync();
+            var doctorByUserId = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == userId);
+            return Ok(new { doctor = doctorByUserId, user });
+        }
+
+        [HttpGet("doctor-in-hospital/{hospitalId}")]
+        public async Task<ActionResult<Doctor>> GetDoctorInHospital([FromRoute] long hospitalId)
+        {
+            var doctorInHospital = await _context.Doctors.Where(d => d.HospitalId == hospitalId).ToListAsync();
+            return Ok(doctorInHospital);
         }
     }
 }

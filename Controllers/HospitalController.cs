@@ -66,11 +66,16 @@ namespace Controllers
             return Ok(hospitalHasName);
         }
 
-        [HttpGet("{userId}")]
-        public async Task<ActionResult<Hospital>> GetHospitalsByUserId(long userId)
+        [HttpGet("hospitalbyuserid/{userId}")]
+        public async Task<ActionResult<Object>> GetHospitalsByUserId([FromRoute] long userId)
         {
+            var user = await _context.Users
+                .Where(u => u.UserId == userId)
+                .Select(u => new { u.GoogleId, u.Role, u.Email })
+                .FirstOrDefaultAsync();
             var hospitalByUserId = await _context.Hospitals.FirstOrDefaultAsync(h => h.UserId == userId);
-            return Ok(hospitalByUserId);
+            return Ok(new { hospital = hospitalByUserId, user });
+
         }
 
 
