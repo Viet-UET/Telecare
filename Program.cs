@@ -18,6 +18,14 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+    await db.Database.MigrateAsync();   // nếu dùng migrations
+    await DbSeeder.SeedAsync(db);       // gọi seeder bạn đã thêm
+}
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
