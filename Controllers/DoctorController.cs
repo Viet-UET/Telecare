@@ -1,4 +1,5 @@
 using System.Diagnostics.Tracing;
+using System.Numerics;
 using Data;
 using DTOs;
 using Microsoft.AspNetCore.Mvc;
@@ -128,5 +129,75 @@ namespace Telecare.Controllers
             var doctorInHospital = await _context.Doctors.Where(d => d.HospitalId == hospitalId).ToListAsync();
             return Ok(doctorInHospital);
         }
+
+        [HttpGet("doctor/top/{page}")]
+        public async Task<ActionResult<object>> GetTopDoctorsByPage(
+            [FromRoute] int page,
+            [FromQuery(Name = "num_per_page")] int numPerPage = 10)
+        {
+            var totalDoctors = await _context.Doctors.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalDoctors / (double)numPerPage);
+
+            if (totalDoctors == 0)
+            {
+                return NotFound("No doctors found");
+            }
+
+            if (page < 1 || page > totalPages)
+            {
+                return BadRequest("invalid page");
+            }
+
+            var doctors = await _context.Doctors
+            .AsNoTracking()
+            .OrderByDescending(d => d.Point ?? 0)
+            .ThenBy(d => d.DoctorId)
+            .Skip((page - 1) * numPerPage)
+            .Take(numPerPage)
+            .ToListAsync();
+
+            var basePath = $"{Request.Scheme}://{Request.Host}{Request.PathBase}/doctor/top";
+
+            string previous;
+            if (page > 1)
+            {
+                previous = $"{basePath}/{page - 1}?num_per_page={numPerPage}";
+            }
+            else
+            {
+                previous = null;
+            }
+
+            string next;
+            if (page < totalPages)
+            {
+                next = $"{basePath}/{page + 1}?num_per_page={numPerPage}";
+            }
+            else
+            {
+                next = null;
+            }
+
+            string self;
+            // self lúc nào cũng có
+            self = $"{basePath}/{page}?num_per_page={numPerPage}";
+
+            return Ok(new
+            {
+                data = doctors,
+                paging = new
+                {
+                    page = page,
+                    pageSize = numPerPage,
+                    totalItems = totalDoctors,
+                    totalPages = totalPages,
+                    previous = previous,
+                    next = next,
+                    self = self
+                }
+            });
+        }
+
+
     }
 }
