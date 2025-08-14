@@ -21,6 +21,10 @@ namespace Data
         public DbSet<MedicalSpecialty> MedicalSpecialties { get; set; }
         public DbSet<Token> Tokens { get; set; }
 
+        public DbSet<CallAppointment> CallAppointments { get; set; }
+        public DbSet<HospitalAppointment> hospitalAppointments { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -158,6 +162,46 @@ namespace Data
                       .IsRequired()
                       .OnDelete(DeleteBehavior.Cascade);
             });
+
+
+            modelBuilder.Entity<CallAppointment>(entity =>
+            {
+                entity.HasKey(x => x.CallAppointmentId);
+
+                entity.Property(x => x.State).HasConversion<int>();
+
+                entity.HasOne(x => x.Patient)
+                .WithMany(x => x.CallAppointments)
+                .HasForeignKey(x => x.PatientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(x => x.Doctor)
+                .WithMany(d => d.CallAppointments)
+                .HasForeignKey(d => d.DoctorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            });
+
+
+            modelBuilder.Entity<HospitalAppointment>(e =>
+            {
+                e.HasKey(x => x.HospitalAppointmentId);
+
+                e.Property(x => x.State).HasConversion<int>();
+
+                e.HasOne(x => x.Patient)
+                .WithMany(x => x.HospitalAppointments)
+                .HasForeignKey(x => x.PatientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(x => x.Hospital)
+                .WithMany(x => x.HospitalAppointments)
+                .HasForeignKey(x => x.HospitalId)
+                .OnDelete(DeleteBehavior.Restrict);
+            });
+
+
+
 
 
         }

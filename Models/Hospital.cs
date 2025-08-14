@@ -15,5 +15,7 @@ namespace Models
         // Navigation Properties
         public User User { get; set; }
         public ICollection<Doctor> Doctors { get; set; } = new List<Doctor>();
+        public ICollection<HospitalAppointment> HospitalAppointments { get; set; } = new List<HospitalAppointment>();
+
     }
 }

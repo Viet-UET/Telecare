@@ -18,6 +18,7 @@ using System.Text;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using System.Xml.Schema;
 using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
+using Microsoft.AspNetCore.StaticFiles;
 
 
 namespace Controllers
@@ -27,12 +28,16 @@ namespace Controllers
     // [Route("[controller]")]
     public class AccountController : ControllerBase
     {
+
+        private readonly IWebHostEnvironment _env;
+
         private const string JWT_SECRET_KEY = "hoangsaongocxamhathanhmocaibatajmanasdaueirawbiefonokfnenjdeckn";
 
         private readonly ApplicationDBContext _context;
-        public AccountController(ApplicationDBContext context)
+        public AccountController(ApplicationDBContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
 
@@ -409,18 +414,107 @@ namespace Controllers
             }
         }
 
+        [HttpGet("user/{email}")]
+        public async Task<ActionResult<User>> GetUserByEmail(string email)
+        {
+            if (await IsUserRegistered(email) == "not registered")
+            {
+                return NotFound("User not found");
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            return Ok(user);
+        }
+
+        [HttpGet("user/role/{role}")]
+        public async Task<ActionResult<List<User>>> GetUserByRole(Role role)
+        {
+            var users = await _context.Users.Where(u => u.Role == role).ToListAsync();
+            return Ok(users);
+        }
 
 
 
+        //---------img----------//
+        [HttpPost("user/up_img")]
+        public async Task<ActionResult<object>> UploadImage(string email, IFormFile image)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return BadRequest("Email is required.");
+            if (image is null || image.Length == 0)
+                return BadRequest("Image is required.");
+
+            var user = await _context.Users.AsTracking().FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
 
 
+            var ext = Path.GetExtension(image.FileName).ToLowerInvariant();
+            var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+            if (!allowed.Contains(ext))
+                return BadRequest("Unsupported file type.");
 
 
+            var fileName = $"{user.UserId}{ext}";
 
 
+            var dir = Path.Combine(_env.ContentRootPath, "image", "user");
+            Directory.CreateDirectory(dir);
+            var fullPath = Path.Combine(dir, fileName);
+            using (var stream = System.IO.File.Create(fullPath))
+            {
+                await image.CopyToAsync(stream);
+            }
+
+            var relativePath = Path.Combine("image", "user", fileName).Replace('\\', '/');
+            user.Img = relativePath;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { fileName = fileName, file_path = relativePath });
+
+
+        }
+
+        [HttpGet("user/get_img")]
+        public async Task<ActionResult<object>> GetImage([FromQuery] string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return BadRequest("email is required");
+
+            var relPath = await _context.Users
+                .AsNoTracking()
+                .Where(u => u.Email == email)
+                .Select(u => u.Img)                 // ví dụ: "image/user/9.jpg"
+                .FirstOrDefaultAsync();
+
+            if (string.IsNullOrWhiteSpace(relPath))
+                return NotFound();
+
+            var rel = relPath.TrimStart('/', '\\');
+            var absPath = Path.GetFullPath(Path.Combine(_env.ContentRootPath, rel));
+
+            if (!System.IO.File.Exists(absPath))
+                return NotFound();
+
+            var provider = new FileExtensionContentTypeProvider();
+            if (!provider.TryGetContentType(absPath, out var contentType))
+                contentType = "application/octet-stream";
+
+            return PhysicalFile(absPath, contentType, enableRangeProcessing: true);
+        }
 
 
 
 
     }
+
+
+
+
+
+
+
 }
