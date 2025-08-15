@@ -21,6 +21,9 @@ namespace Data
         public DbSet<MedicalSpecialty> MedicalSpecialties { get; set; }
         public DbSet<Token> Tokens { get; set; }
 
+
+
+
         public DbSet<CallAppointment> CallAppointments { get; set; }
         public DbSet<HospitalAppointment> hospitalAppointments { get; set; }
 
@@ -170,6 +173,8 @@ namespace Data
 
                 entity.Property(x => x.State).HasConversion<int>();
 
+                entity.Property(x => x.CallAppointmentId).ValueGeneratedOnAdd();
+
                 entity.HasOne(x => x.Patient)
                 .WithMany(x => x.CallAppointments)
                 .HasForeignKey(x => x.PatientId)
@@ -186,6 +191,9 @@ namespace Data
             modelBuilder.Entity<HospitalAppointment>(e =>
             {
                 e.HasKey(x => x.HospitalAppointmentId);
+
+
+                e.Property(x => x.HospitalAppointmentId).ValueGeneratedOnAdd();
 
                 e.Property(x => x.State).HasConversion<int>();
 
