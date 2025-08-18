@@ -3,6 +3,7 @@ using DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models;
+using Models.Enums;
 
 namespace Controllers
 {
@@ -12,7 +13,7 @@ namespace Controllers
     {
         private readonly ApplicationDBContext _context;
 
-        private AppointmentController(ApplicationDBContext context)
+        public AppointmentController(ApplicationDBContext context)
         {
             _context = context;
         }
@@ -56,6 +57,19 @@ namespace Controllers
             return Ok(appointment);
         }
 
+        [HttpPost("change-time-call-appointment")]
+        public async Task<ActionResult<object>> ChangeTimeCallAppointment(long userId, int callAppointmentId, DateTime time)
+        {
+            var isDoctor = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (isDoctor.Role != Role.DOCTOR)
+            {
+                return Forbid("Only doctors can change the appointment time.");
+            }
+            var currentAppointment = await _context.CallAppointments.FirstOrDefaultAsync(c => c.CallAppointmentId == callAppointmentId);
+            currentAppointment.Time = time;
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Appointment time successfully changed." });
+        }
 
 
 
