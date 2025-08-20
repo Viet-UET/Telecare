@@ -24,6 +24,7 @@ namespace Models
         public MedicalSpecialty MedicalSpecialty { get; set; }
         public Hospital Hospital { get; set; }
         public ICollection<CallAppointment> CallAppointments { get; set; } = new List<CallAppointment>();
+        public ICollection<DoctorComment> DoctorComments { get; set; } = new List<DoctorComment>();
 
     }
 }

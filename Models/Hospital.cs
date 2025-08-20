@@ -16,6 +16,7 @@ namespace Models
         public User User { get; set; }
         public ICollection<Doctor> Doctors { get; set; } = new List<Doctor>();
         public ICollection<HospitalAppointment> HospitalAppointments { get; set; } = new List<HospitalAppointment>();
+        public ICollection<HospitalComment> HospitalComments { get; set; } = new List<HospitalComment>();
 
     }
 }

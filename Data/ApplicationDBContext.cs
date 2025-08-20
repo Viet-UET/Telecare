@@ -1,5 +1,6 @@
 
 
+using System.ClientModel.Primitives;
 using Microsoft.EntityFrameworkCore;
 using Models;
 
@@ -26,6 +27,10 @@ namespace Data
 
         public DbSet<CallAppointment> CallAppointments { get; set; }
         public DbSet<HospitalAppointment> hospitalAppointments { get; set; }
+
+
+        public DbSet<DoctorComment> DoctorComments { get; set; }
+        public DbSet<HospitalComment> HospitalComments { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -208,7 +213,41 @@ namespace Data
                 .OnDelete(DeleteBehavior.Restrict);
             });
 
+            modelBuilder.Entity<DoctorComment>(e =>
+            {
+                e.HasKey(x => x.DoctorCommentId);
+                e.Property(x => x.DoctorCommentId).ValueGeneratedOnAdd();
 
+                e.HasOne(x => x.Patient)
+                      .WithMany(p => p.DoctorComments)
+                      .HasForeignKey(x => x.PatientId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(x => x.Doctor)
+                      .WithMany(d => d.DoctorComments)
+                      .HasForeignKey(x => x.DoctorId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<HospitalComment>(e =>
+            {
+                e.HasKey(x => x.HospitalCommentId);
+                e.Property(x => x.HospitalCommentId).ValueGeneratedOnAdd();
+
+
+                e.HasOne(x => x.Patient)
+                .WithMany(x => x.HospitalComments)
+                .HasForeignKey(x => x.PatientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(x => x.Hospital)
+                .WithMany(x => x.HospitalComments)
+                .HasForeignKey(x => x.HospitalId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+
+            });
 
 
 
