@@ -4,8 +4,8 @@ namespace Models
     {
         public int HospitalCommentId { get; set; }
         public DateTime? Time { get; set; }
-        public int HospitalId { get; set; }
-        public int PatientId { get; set; }
+        public long HospitalId { get; set; }
+        public long PatientId { get; set; }
         public string? Comment { get; set; }
         public float? Point { get; set; }
 
