@@ -183,5 +183,52 @@ public static class DbSeeder
         }
         await db.hospitalAppointments.AddRangeAsync(hospitalAppointments); // DbSet: hospitalAppointments
         await db.SaveChangesAsync();
+
+
+
+        // 5) Tạo comment cho BÁC SĨ và BỆNH VIỆN
+        var doctorComments = new List<DoctorComment>();
+        var hospitalComments = new List<HospitalComment>();
+
+        // Mỗi bác sĩ nhận ngẫu nhiên 3–10 comment từ các bệnh nhân ngẫu nhiên
+        foreach (var d in doctors)
+        {
+            int n = rnd.Next(3, 11);
+            for (int k = 0; k < n; k++)
+            {
+                var p = patients[rnd.Next(patients.Count)];
+                doctorComments.Add(new DoctorComment
+                {
+                    DoctorId = d.DoctorId,
+                    PatientId = p.PatientId,
+                    Time = fakerVi.Date.Past(1), // trong vòng 1 năm trở lại
+                    Comment = fakerVi.Lorem.Sentences(rnd.Next(1, 3)),
+                    Point = (float)Math.Round(2.0 + rnd.NextDouble() * 3.0, 1) // 2.0–5.0
+                });
+            }
+        }
+
+        // Mỗi bệnh viện nhận ngẫu nhiên 5–15 comment
+        foreach (var h in hospitals)
+        {
+            int n = rnd.Next(5, 16);
+            for (int k = 0; k < n; k++)
+            {
+                var p = patients[rnd.Next(patients.Count)];
+                hospitalComments.Add(new HospitalComment
+                {
+                    HospitalId = h.HospitalId,
+                    PatientId = p.PatientId,
+                    Time = fakerVi.Date.Past(1),
+                    Comment = fakerVi.Lorem.Sentences(rnd.Next(1, 3)),
+                    Point = (float)Math.Round(2.0 + rnd.NextDouble() * 3.0, 1)
+                });
+            }
+        }
+
+        await db.DoctorComments.AddRangeAsync(doctorComments);
+        await db.HospitalComments.AddRangeAsync(hospitalComments);
+        await db.SaveChangesAsync();
+
     }
 }
