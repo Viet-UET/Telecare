@@ -33,6 +33,11 @@ namespace Data
         public DbSet<HospitalComment> HospitalComments { get; set; }
 
 
+        public DbSet<Conversation> Conversations { get; set; }
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<Attachment> Attachments { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -250,6 +255,67 @@ namespace Data
             });
 
 
+            modelBuilder.Entity<Conversation>(e =>
+            {
+                e.HasKey(x => x.ConversationId);
+                e.Property(x => x.ConversationId).ValueGeneratedOnAdd();
+
+                e.Property(x => x.State).HasConversion<int>();
+
+                e.HasOne(x => x.Doctor)
+                .WithMany(x => x.Conversations)
+                .HasForeignKey(x => x.DoctorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(x => x.Patient)
+                .WithMany(x => x.Conversations)
+                .HasForeignKey(x => x.PatientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasMany(x => x.Messages)
+                .WithOne(x => x.Conversation)
+                .HasForeignKey(x => x.ConversationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasMany(x => x.Attachments)
+                .WithOne(x => x.Conversation)
+                .HasForeignKey(x => x.ConversationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            });
+
+
+
+            modelBuilder.Entity<Message>(e =>
+            {
+                e.HasKey(x => x.MessageId);
+                e.Property(x => x.MessageId).ValueGeneratedOnAdd();
+
+                e.Property(x => x.Text).HasMaxLength(100000);
+
+                e.HasOne(x => x.User)
+                .WithMany(x => x.Messages)
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            });
+
+            modelBuilder.Entity<Attachment>(e =>
+            {
+                e.HasKey(x => x.AttachmentId);
+                e.Property(x => x.AttachmentId).ValueGeneratedOnAdd();
+                e.Property(x => x.State).HasConversion<int>();
+                e.Property(x => x.File).IsRequired().HasMaxLength(10000);
+
+
+                e.HasOne(x => x.User)
+                .WithMany(u => u.Attachments)
+                .HasForeignKey(x => x.userId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            });
 
         }
     }

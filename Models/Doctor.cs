@@ -26,5 +26,7 @@ namespace Models
         public ICollection<CallAppointment> CallAppointments { get; set; } = new List<CallAppointment>();
         public ICollection<DoctorComment> DoctorComments { get; set; } = new List<DoctorComment>();
 
+        public ICollection<Conversation> Conversations { get; set; } = new List<Conversation>();
+
     }
 }

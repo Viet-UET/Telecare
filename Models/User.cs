@@ -18,5 +18,9 @@ namespace Models
         public Hospital Hospital { get; set; }
         public Doctor Doctor { get; set; }
         public ICollection<Token> Tokens { get; set; } = new List<Token>();
+
+        public ICollection<Message> Messages { get; set; } = new List<Message>();
+        public ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
+
     }
 }

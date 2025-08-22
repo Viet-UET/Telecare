@@ -22,5 +22,8 @@ namespace Models
 
         public ICollection<DoctorComment> DoctorComments { get; set; } = new List<DoctorComment>();
         public ICollection<HospitalComment> HospitalComments { get; set; } = new List<HospitalComment>();
+
+        public ICollection<Conversation> Conversations { get; set; } = new List<Conversation>();
+
     }
 }
