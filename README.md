@@ -1,24 +1,12 @@
-# 🏥 Telecare - Healthcare Management System
+#  Telecare - Healthcare Management System
 
 A comprehensive healthcare management system built with ASP.NET Core 8.0, providing telemedicine services, appointment management, and healthcare facility administration.
 
-## 📋 Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Technology Stack](#technology-stack)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [API Documentation](#api-documentation)
-- [Database Schema](#database-schema)
-- [Contributing](#contributing)
-- [License](#license)
-
-## 🎯 Overview
+##  Overview
 
 Telecare is a modern healthcare management system designed to facilitate communication between patients, doctors, and hospitals. The system supports telemedicine appointments, secure messaging, and comprehensive healthcare facility management.
 
-## ✨ Features
+##  Features
 
 ###  Authentication & Authorization
 - JWT-based authentication system
@@ -206,18 +194,4 @@ The application automatically:
 - **DoctorComment**: Patient feedback for doctors
 - **HospitalComment**: Patient feedback for hospitals
 
-## 🔧 Development
-
-### Adding New Features
-1. Create model in `Models/` directory
-2. Add DTOs in `DTOs/` directory
-3. Create controller in `Controllers/` directory
-4. Add database migration: `dotnet ef migrations add FeatureName`
-5. Update database: `dotnet ef database update`
-
-### Code Style
-- Follow C# naming conventions
-- Use async/await for database operations
-- Implement proper error handling
-- Add XML documentation for public APIs
 
